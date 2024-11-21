@@ -4,6 +4,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ConsultantController ;
 
+use App\Http\Controllers\ProgramController;
+use App\Http\Controllers\QuizController;
+use App\Http\Controllers\QuizResultController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -29,3 +33,16 @@ Route::get('/consultant-showWeekly/{id}', [ConsultantController::class, 'GETSLOT
 Route::get('/consultants/{id}', [ConsultantController::class, 'show']);
 
 Route::get('/consultants/{consultantId}/weekly-slots', [ConsultantController::class, 'getWeeklySlots']);
+
+
+
+
+Route::get('programms', [ProgramController::class, 'getProgramms']);
+Route::get('programmDetails/{id}', [ProgramController::class, 'getProgrammDetails']);
+
+Route::post('quiz-submit/{quiz_id}', [QuizController::class, 'answerQuiz']);
+Route::get('quiz-results/{quiz_id}', [QuizController::class, 'listQuizResults']);
+Route::get('quiz-analytics/{quiz_id}', [QuizController::class, 'quizResultsAnalytic']);
+
+Route::get('quiz-results-save/{quiz_id}', [QuizResultController::class, 'calculateQuizResults']);
+

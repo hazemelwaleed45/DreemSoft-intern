@@ -9,9 +9,10 @@ class QuizQuestionResult extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'quiz_result_id', 
-        'quiz_question_id', 
-        'quiz_question_answer_id'
+        'user_id' ,
+        'quiz_id', 
+        'question_id', 
+        'answer_id'
     ];
 
     public function quizResult()
