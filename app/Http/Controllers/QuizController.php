@@ -18,7 +18,7 @@ class QuizController extends Controller
 
 public function answerQuiz(Request $request, $quiz_id)
 {
-    // Validate input
+   
     $validator = Validator::make($request->all(), [
         'user_id' => 'required|exists:users,id',
         'answers' => 'required|array',
@@ -53,7 +53,7 @@ public function answerQuiz(Request $request, $quiz_id)
             $answer_obj = QuizQuestionAnswer::find($answer_id);
             $score += $answer_obj->score;
 
-            // Store each answer in the quiz_question_results table
+            
             QuizQuestionResult::create([
                 'user_id' => $data['user_id'],
                 'quiz_id' => $quiz_id,
@@ -62,7 +62,7 @@ public function answerQuiz(Request $request, $quiz_id)
             ]);
         }
 
-        // Save the quiz result
+
         QuizResult::create([
             'user_id' => $data['user_id'],
             'quiz_id' => $quiz_id,
@@ -90,14 +90,21 @@ public function answerQuiz(Request $request, $quiz_id)
 
     public function quizResultsAnalytic($quiz_id)
     {
-        $analytics = DB::table('quiz_question_results')
-            ->select('question_id', 'answer_id', DB::raw('count(*) as num_users'))
-            ->where('quiz_id', $quiz_id)
-            ->groupBy('question_id', 'answer_id')
+        $analytics = DB::table('quiz_question_results as qqr')
+            ->join('quiz_questions as qq', 'qq.id', '=', 'qqr.question_id')
+            ->join('quiz_question_answers as qa', 'qa.id', '=', 'qqr.answer_id')
+            ->select(
+                'qq.text as question_text', 
+                'qa.text as answer_text', 
+                DB::raw('count(*) as num_users')
+            )
+            ->where('qqr.quiz_id', $quiz_id)
+            ->groupBy('qq.id', 'qa.id')
             ->get();
-
+    
         return response()->json($analytics);
     }
+    
 
    
 }

@@ -44,5 +44,5 @@ Route::post('quiz-submit/{quiz_id}', [QuizController::class, 'answerQuiz']);
 Route::get('quiz-results/{quiz_id}', [QuizController::class, 'listQuizResults']);
 Route::get('quiz-analytics/{quiz_id}', [QuizController::class, 'quizResultsAnalytic']);
 
-Route::get('quiz-results-save/{quiz_id}', [QuizResultController::class, 'calculateQuizResults']);
+//  Route::get('quiz-results-save/{quiz_id}', [QuizResultController::class, 'calculateQuizResults']);
 
