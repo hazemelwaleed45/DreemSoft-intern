@@ -1,12 +1,15 @@
 <?php
 
+use App\Http\Controllers\AnswerController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ConsultantController ;
 
 use App\Http\Controllers\ProgramController;
+use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\QuizController;
 use App\Http\Controllers\QuizResultController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -35,6 +38,8 @@ Route::get('/consultants/{id}', [ConsultantController::class, 'show']);
 Route::get('/consultants/{consultantId}/weekly-slots', [ConsultantController::class, 'getWeeklySlots']);
 
 
+Route::get('answerDetails/{id}', [AnswerController::class, 'show']);
+Route::get('questionDetails/{id}', [QuestionController::class, 'show']);
 
 
 Route::get('programms', [ProgramController::class, 'getProgramms']);

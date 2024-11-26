@@ -14,6 +14,10 @@ return [
     |
     */
 
+    'notdiamond' => [
+        'api_url' => env('NOTDIAMOND_API_URL'),
+        'api_key' => env('NOTDIAMOND_API_KEY'),
+    ],
     'mailgun' => [
         'domain' => env('MAILGUN_DOMAIN'),
         'secret' => env('MAILGUN_SECRET'),

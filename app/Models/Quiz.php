@@ -10,6 +10,10 @@ class Quiz extends Model
     use HasFactory;
     protected $fillable = ['session_id', 'title'];
 
+    protected $attributes = [
+        'questionsNumber' => 5,
+    ];
+
     public function session()
     {
         return $this->belongsTo(Session::class);

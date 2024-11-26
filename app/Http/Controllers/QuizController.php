@@ -10,6 +10,9 @@ use App\Models\QuizQuestion ;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 
 
@@ -112,6 +115,36 @@ class QuizController extends Controller
     
         return response()->json($analytics);
     }
+
+    public function show($id)
+    {
+      
+        $quiz = Quiz::find($id);
+
+        if (!$quiz) {
+            return response()->json(['error' => 'Quiz not found.'], 404);
+        }
+
+       
+        $quizQuestions = QuizQuestion::where('quiz_id', $quiz->id)->get();
+
+        
+        $questionsWithAnswers = $quizQuestions->map(function ($question) {
+            $answers = QuizQuestionAnswer::where('quiz_question_id', $question->id)->get();
+            
+            
+            return [
+                'question' => $question->text,
+                'answers' => $answers->pluck('text'), 
+            ];
+        });
+
+        return response()->json([
+            'quiz' => $quiz->name, 
+            'questions' => $questionsWithAnswers
+        ]);
+    }
+
     
 
    
