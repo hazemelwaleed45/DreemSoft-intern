@@ -13,11 +13,128 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-
+use Smalot\PdfParser\Parser;
+use OpenAI\Client;
 
 
 class QuizController extends Controller
 {
+
+
+
+
+    public function generateQuiz(Request $request)
+    {
+        // Validate the uploaded PDF file
+        $request->validate([
+            'pdf' => 'required|file|mimes:pdf',
+        ]);
+    
+        // Extract text from the PDF
+        $pdfParser = new Parser();
+        $pdfFile = $request->file('pdf');
+        $pdfText = $pdfParser->parseFile($pdfFile->getRealPath())->getText();
+    
+        // Hardcoded SMS-style input
+        $hardcodedSms = "Create a quiz from the following text. The quiz should contain 5 questions, each with 4 correct answers, and each answer should have a score.";
+    
+        // Combine the hardcoded SMS and PDF text to create the prompt
+        $prompt = $hardcodedSms . "\n\nHere is the text:\n" . $pdfText;
+    
+        // Correct endpoint for chat-completion models
+        $url = 'https://api.openai.com/v1/chat/completions';
+    
+        // Prepare the headers with the OpenAI API key
+        $headers = [
+            'Authorization' => 'Bearer ' . env('OPENAI_API_KEY'),
+            'Content-Type' => 'application/json',
+        ];
+    
+        // Prepare the payload for the OpenAI API
+        $data = [
+            'model' => 'gpt-4', // You can use 'gpt-4' or other models as needed
+            'messages' => [
+                ['role' => 'system', 'content' => 'You are a helpful assistant.'],
+                ['role' => 'user', 'content' => $prompt],
+            ],
+            'max_tokens' => 1000,
+            'temperature' => 0.7
+        ];
+    
+        // Send the request to OpenAI API using Laravel's HTTP client (Guzzle)
+        try {
+            $response = Http::withHeaders($headers)
+                ->post($url, $data); // Send POST request to OpenAI
+    
+            // Check if the response is successful
+            if ($response->successful()) {
+                $quiz = $response->json()['choices'][0]['message']['content'];
+    
+                return response()->json([
+                    'success' => true,
+                    'quiz' => $quiz,
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Failed to generate quiz: ' . $response->body(),
+                ], 500);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+    
+
+
+    // https://api.openai.com/v1/chat/completions 
+    // public function generateQuiz(Request $request)
+    // {
+    //     // Validate the uploaded PDF file
+    //     $request->validate([
+    //         'pdf' => 'required|file|mimes:pdf',
+    //     ]);
+
+    //     // Extract text from the PDF
+    //     $pdfParser = new Parser();
+    //     $pdfFile = $request->file('pdf');
+    //     $pdfText = $pdfParser->parseFile($pdfFile->getRealPath())->getText();
+
+    //     // Hardcoded SMS-style input
+    //     $hardcodedSms = "Create a quiz from the following text. The quiz should contain 5 questions, each with 4 correct answers, and each answer should have a score.";
+
+    //     // Combine the hardcoded SMS and PDF text to create the prompt
+    //     $prompt = $hardcodedSms . "\n\nHere is the text:\n" . $pdfText;
+
+    //     // Connect to OpenAI and generate the quiz
+    //     $client = new Client(['api_key' => env('OPENAI_API_KEY')]);
+
+    //     try {
+    //         $response = $client->completions()->create([
+    //             'model' => 'gpt-4o-mini', // Adjust as needed
+    //             'prompt' => $prompt,
+    //             'max_tokens' => 1000,
+    //             'temperature' => 0.7,
+    //         ]);
+
+    //         $quiz = $response['choices'][0]['text'];
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'quiz' => $quiz,
+    //         ]);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'error' => $e->getMessage(),
+    //         ], 500);
+    //     }
+    // }
+  
+
     public function answerQuiz(Request $request, $quiz_id)
     {
         $validator = Validator::make($request->all(), [
